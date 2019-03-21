@@ -16,9 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path
+from rest_framework_jwt.views import obtain_jwt_token
 from virket.views import IndexView
+from virket.views import UserListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^api-token-auth', obtain_jwt_token),
     url(r'^$', IndexView.as_view()),
+    url(r'^users/$', UserListView.as_view()),
 ]
