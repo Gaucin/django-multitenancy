@@ -17,12 +17,14 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path
 from rest_framework_jwt.views import obtain_jwt_token
-from virket.views import IndexView
-from virket.views import UserListView
+from virket.views import IndexView, user_list, TaskByUserListView, TaskListView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^api-token-auth', obtain_jwt_token),
     url(r'^$', IndexView.as_view()),
-    url(r'^users/$', UserListView.as_view()),
+    url(r'^users/$', user_list),
+    url(r'^tasks/$', TaskListView.as_view()),
+    url(r'^tasksByUser/$', TaskByUserListView.as_view()),
 ]
