@@ -10,10 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
-import os
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from dotenv import Dotenv
+from pathlib import Path
+env_file = '.env'
+env_path = Path(env_file)
+if env_path.is_file():
+    dotenv = Dotenv(env_file)
+    os.environ.update(dotenv)
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,12 +31,32 @@ SECRET_KEY = '_sow6r(g2z+2xq%#@$45^3#1gvsm#w_f+@=nd3b@ui%_mn#j_m'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
+SHARED_APPS = (
+    'tenant_schemas',
+    'tenants',
+    'django.contrib.contenttypes',
+    'django.contrib.auth',
+    'django.contrib.admin',
+    'virket',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+)
 
+TENANT_APPS = (
+    'django.contrib.contenttypes',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.sessions',
+    'virket',
+)
 
 # Application definition
 
 INSTALLED_APPS = [
+    'tenant_schemas',
+    'tenants',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +66,12 @@ INSTALLED_APPS = [
     'virket',
 ]
 
+DEFAULT_FILE_STORAGE='tenant_schemas.storage.TenantFileSystemStorage'
+
+TENANT_MODEL = "tenants.Tenant"
+
 MIDDLEWARE = [
+    'tenant_schemas.middleware.TenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,19 +99,29 @@ TEMPLATES = [
     },
 ]
 
+TEMPLATE_LOADERS = (
+    'tenant_schemas.template_loaders.FilesystemLoader',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader'
+)
+
 WSGI_APPLICATION = 'virket.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+DATABASE_ROUTERS = (
+    'tenant_schemas.routers.TenantSyncRouter',
+)
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'virket',
-        'HOST': 'localhost',
-        'USER': 'virket',
-        'PASSWORD': '#paperplane!',
+        'ENGINE': 'tenant_schemas.postgresql_backend',
+        'NAME': os.getenv('DB_NAME'),
+        'HOST': os.getenv('DB_HOST'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
     }
 }
 
@@ -116,7 +157,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ),
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

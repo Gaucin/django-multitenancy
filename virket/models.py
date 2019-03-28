@@ -17,3 +17,7 @@ class Task(models.Model):
     is_active = models.BooleanField(default=True)
     creation_date = models.DateTimeField(auto_now=True)
 
+
+class Stuff(models.Model):
+	name = models.CharField(max_length=16)
+	
