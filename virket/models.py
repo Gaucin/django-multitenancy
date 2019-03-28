@@ -13,7 +13,7 @@ class AppUser(User):
 
 class Task(models.Model):
     description = models.CharField(max_length=50)
-    owner = models.ForeignKey(AppUser, on_delete=models.CASCADE)
+    owner = models.ForeignKey(AppUser, related_name='tasks', on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     creation_date = models.DateTimeField(auto_now=True)
 

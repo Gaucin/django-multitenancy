@@ -30,17 +30,37 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
-INSTALLED_APPS = [
+SHARED_APPS = [
+    'tenant_schemas',
+    'virket',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+
+TENANT_APPS = [
+    'django.contrib.contenttypes',
+    'django.contrib.auth',
+]
+
+INSTALLED_APPS = [
+    'tenant_schemas',
     'virket',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [
+    'tenant_schemas.middleware.TenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,6 +69,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+TENANT_MODEL = "virket.Task"
 
 ROOT_URLCONF = 'virket.urls'
 
@@ -76,12 +98,18 @@ WSGI_APPLICATION = 'virket.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        #'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'tenant_schemas.postgresql_backend',
         'NAME': 'virket',
         'HOST': 'localhost',
         'USER': 'virket',
         'PASSWORD': '#paperplane!',
     }
+}
+
+
+DATABASE_ROUTERS = {
+    'tenant_schemas.routers.TenantSyncRouter',
 }
 
 
@@ -115,6 +143,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+}
+
+
+JWT_AUTH = {
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'virket.views.jwt_response_payload_handler',
 }
 
 
