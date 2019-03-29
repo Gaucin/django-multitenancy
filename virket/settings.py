@@ -11,10 +11,16 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from dotenv import Dotenv
+from pathlib import Path
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Read environments configuration
+env_file = '.env'
+if Path(env_file).is_file():
+    os.environ.update(Dotenv(env_file))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -25,22 +31,45 @@ SECRET_KEY = '_sow6r(g2z+2xq%#@$45^3#1gvsm#w_f+@=nd3b@ui%_mn#j_m'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
-INSTALLED_APPS = [
+SHARED_APPS = [
+    'tenant_schemas',
+    'tenants',
+    'virket',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+
+TENANT_APPS = [
     'virket',
+    'django.contrib.contenttypes',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.sessions',
+]
+
+INSTALLED_APPS = [
+    'tenant_schemas',
+    'virket',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [
+    'tenant_schemas.middleware.TenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -50,7 +79,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'virket.urls'
+TENANT_MODEL = "tenants.Tenant"
+
 
 TEMPLATES = [
     {
@@ -76,12 +106,17 @@ WSGI_APPLICATION = 'virket.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'tenant_schemas.postgresql_backend',
         'NAME': 'virket',
         'HOST': 'localhost',
         'USER': 'virket',
         'PASSWORD': '#paperplane!',
     }
+}
+
+
+DATABASE_ROUTERS = {
+    'tenant_schemas.routers.TenantSyncRouter',
 }
 
 
@@ -115,6 +150,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+}
+
+
+JWT_AUTH = {
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'virket.views.jwt_response_payload_handler',
 }
 
 
